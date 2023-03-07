@@ -5,7 +5,7 @@ USE company_db;
 
 CREATE TABLE department (
     id INT PRIMARY KEY,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(30) NOT NULL
 
 );
 
@@ -26,8 +26,8 @@ CREATE TABLE employee (
     FOREIGN KEY (role_id)
     REFERENCES role(id),
     manager_id INT,
-    FOREIGN KEY (department)
-    REFERENCES department(id)
+    FOREIGN KEY (manager_id)
+    REFERENCES employee(id)
     ON DELETE SET NULL
 );
 
