@@ -67,7 +67,7 @@ function menu() {
                     break;
 
                 case 'Add a role':
-                    // call view all departments
+                    addRole()
                     break;
 
                 case 'Add an employee':
@@ -124,34 +124,37 @@ function viewRoles() {
   }
 
   function addRole() {
-    inquirer
-        .prompt([
-            {
-                type: 'input',
-                name: 'roleName',
-                message: "What is the name of the role?",
-            },
-
-            {
-                type: 'input',
-                name: 'roleSalary',
-                message: "What is the salary of the role?",
-            },
-
-            {
-                type: 'list',
-                name: 'deptName',
-                message: "What department will this role be added to?",
-                choices: [
-
-                ]
-            }
-        ])
-        .then(res => {
-            db.query('INSERT INTO role SET ?', res.deptName, (error, data) => {
-                console.log('Role successfully added!')
-                menu()
+    db.promise().query('SELECT * FROM department') 
+    .then(([data]) => {
+        const deptChoices = data.map(({ id, name }) => ({ name: name, id: id}))
+        inquirer
+            .prompt([
+                {
+                    type: 'input',
+                    name: 'title',
+                    message: "What is the name of the role?",
+                },
+    
+                {
+                    type: 'input',
+                    name: 'salary',
+                    message: "What is the salary of the role?",
+                },
+    
+                {
+                    type: 'list',
+                    name: 'department_id',
+                    message: "What department will this role be added to?",
+                    choices: deptChoices
+                }
+            ])
+            .then(res => {
+                db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',  [res.title, res.salary, res.department_id], (error, data) => {
+                    console.log('Role successfully added!')
+                    menu()
+                })
             })
-        })
+    })
+        
 }
 
