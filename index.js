@@ -4,6 +4,7 @@ const mysql = require('mysql2')
 const logo = require('asciiart-logo')
 require('dotenv').config()
 
+// connect to sql database
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -36,16 +37,18 @@ function menu() {
                 message: "What would you like to do?",
                 choices: [
                     'View all departments',
-                    'view all roles',
-                    "view all employees",
-                    'add a department',
-                    'add a role',
-                    'add an employee',
-                    'update an employee role',
-                    'quit'
+                    'View all roles',
+                    'View all employees',
+                    'Add a department',
+                    'Add a role',
+                    'Add an employee',
+                    'Update an employee role',
+                    'Quit'
                 ]
             }
-        ]).then(res => {
+        ])
+        .then(res => {
+            // output based on user input for prompts
             switch (res.options) {
                 case 'View all departments':
                     viewDepartments()
@@ -60,7 +63,7 @@ function menu() {
                     break;
 
                 case 'Add a department':
-                    // call view all departments
+                    addDepartment()
                     break;
 
                 case 'Add a role':
@@ -76,7 +79,7 @@ function menu() {
                     break;
 
                 default:
-                    'quit'
+                    'Quit'
                     break;
             }
         })
@@ -87,9 +90,26 @@ function viewDepartments() {
         console.table(data)
         menu()
     })
-  }
+}
 
-  function viewRoles() {
+function addDepartment() {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'deptName',
+                message: "What is the name of the department?",
+            }
+        ])
+        .then(res => {
+            db.query('INSERT INTO department SET ?', res.deptName, (error, data) => {
+                console.log('Department successfully added!')
+                menu()
+            })
+        })
+}
+
+function viewRoles() {
     db.query('SELECT * FROM role', (error, data) => {
         console.table(data)
         menu()
@@ -102,3 +122,36 @@ function viewDepartments() {
         menu()
     })
   }
+
+  function addRole() {
+    inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'roleName',
+                message: "What is the name of the role?",
+            },
+
+            {
+                type: 'input',
+                name: 'roleSalary',
+                message: "What is the salary of the role?",
+            },
+
+            {
+                type: 'list',
+                name: 'deptName',
+                message: "What department will this role be added to?",
+                choices: [
+
+                ]
+            }
+        ])
+        .then(res => {
+            db.query('INSERT INTO role SET ?', res.deptName, (error, data) => {
+                console.log('Role successfully added!')
+                menu()
+            })
+        })
+}
+
