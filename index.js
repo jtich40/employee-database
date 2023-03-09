@@ -75,11 +75,11 @@ function menu() {
                     break;
 
                 case 'Update an employee role':
-                    // call view all departments
+                    updateEmployee()
                     break;
 
                 default:
-                    'Quit'
+                    quitApp()
                     break;
             }
         })
@@ -114,86 +114,86 @@ function viewRoles() {
         console.table(data)
         menu()
     })
-  }
+}
 
-  function viewEmployees() {
+function viewEmployees() {
     db.query('SELECT * FROM employee', (error, data) => {
         console.table(data)
         menu()
     })
-  }
-
-  function addRole() {
-    db.promise().query('SELECT * FROM department') 
-    .then(([data]) => {
-        const deptChoices = data.map(({ id, name }) => ({ name: name, value: id}))
-        inquirer
-            .prompt([
-                {
-                    type: 'input',
-                    name: 'title',
-                    message: "What is the name of the role?",
-                },
-    
-                {
-                    type: 'input',
-                    name: 'salary',
-                    message: "What is the salary of the role?",
-                },
-    
-                {
-                    type: 'list',
-                    name: 'department_id',
-                    message: "What department will this role be added to?",
-                    choices: deptChoices
-                }
-            ])
-            .then(res => {
-                db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',  [res.title, res.salary, res.department_id], (error, data) => {
-                    console.log('Role successfully added!')
-                    menu()
-                })
-            })
-    })
-        
 }
 
 function addRole() {
-    db.promise().query('SELECT * FROM department') 
-    .then(([data]) => {
-        const deptChoices = data.map(({ id, name }) => ({ 
-            name: name, 
-            value: id
-        }))
-        inquirer
-            .prompt([
-                {
-                    type: 'input',
-                    name: 'title',
-                    message: "What is the name of the role?",
-                },
-    
-                {
-                    type: 'input',
-                    name: 'salary',
-                    message: "What is the salary of the role?",
-                },
-    
-                {
-                    type: 'list',
-                    name: 'department',
-                    message: "What department will this role be added to?",
-                    choices: deptChoices
-                }
-            ])
-            .then(res => {
-                db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)',  [res.title, res.salary, res.department], (error, data) => {
-                    console.log('Role successfully added!')
-                    menu()
+    db.promise().query('SELECT * FROM department')
+        .then(([data]) => {
+            const deptChoices = data.map(({ id, name }) => ({ name: name, value: id }))
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        name: 'title',
+                        message: "What is the name of the role?",
+                    },
+
+                    {
+                        type: 'input',
+                        name: 'salary',
+                        message: "What is the salary of the role?",
+                    },
+
+                    {
+                        type: 'list',
+                        name: 'department_id',
+                        message: "What department will this role be added to?",
+                        choices: deptChoices
+                    }
+                ])
+                .then(res => {
+                    db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department_id], (error, data) => {
+                        console.log('Role successfully added!')
+                        menu()
+                    })
                 })
-            })
-    })
-        
+        })
+
+}
+
+function addRole() {
+    db.promise().query('SELECT * FROM department')
+        .then(([data]) => {
+            const deptChoices = data.map(({ id, name }) => ({
+                name: name,
+                value: id
+            }))
+            inquirer
+                .prompt([
+                    {
+                        type: 'input',
+                        name: 'title',
+                        message: "What is the name of the role?",
+                    },
+
+                    {
+                        type: 'input',
+                        name: 'salary',
+                        message: "What is the salary of the role?",
+                    },
+
+                    {
+                        type: 'list',
+                        name: 'department',
+                        message: "What department will this role be added to?",
+                        choices: deptChoices
+                    }
+                ])
+                .then(res => {
+                    db.query('INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)', [res.title, res.salary, res.department], (error, data) => {
+                        console.log('Role successfully added!')
+                        menu()
+                    })
+                })
+        })
+
 }
 
 function addEmployee() {
@@ -233,13 +233,13 @@ function addEmployee() {
                         .then(res => {
                             const role = res.role
 
-                            db.promise().query('SELECT * FROM employee')
+                            db.promise().query('SELECT * FROM employee WHERE manager_id IS NULL')
                                 .then(([data]) => {
-                                    const managerChoices = data.map(({ first_name, last_name, manager_id }) => ({
+                                    const managerChoices = data.map(({ first_name, last_name, id }) => ({
                                         name: `${first_name} ${last_name}`,
-                                        value: manager_id
+                                        value: id
                                     }))
-
+                                    // adds option to select None if the employee is a manager
                                     managerChoices.push({ name: "None", value: null });
 
                                     inquirer
@@ -253,7 +253,7 @@ function addEmployee() {
                                         ])
 
                                         .then(res => {
-                                            db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [firstName, LastName, role, res.manager_id], (error, data) => {
+                                            db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [firstName, LastName, role, res.manager], (error, data) => {
                                                 console.log('Employee successfully added!')
                                                 menu()
                                             })
@@ -264,4 +264,73 @@ function addEmployee() {
         })
 }
 
+function updateEmployee() {
+    db.promise().query('SELECT * FROM employee')
+        .then(([data]) => {
+            const employeeChoices = data.map(({ id, first_name, last_name }) =>
+            ({
+                name: `${first_name} ${last_name}`,
+                value: id
+            }))
+            inquirer
+                .prompt([
+                    {
+                        name: 'employee',
+                        message: "Which employee would you like to update?",
+                        type: 'list',
+                        choices: employeeChoices
+                    }
+                ])
+                .then(res => {
+                    const employee = res.employee
 
+                    db.promise().query('SELECT * FROM role')
+                        .then(([data]) => {
+                            const roleChoices = data.map(({ id, title }) => ({
+                                name: title,
+                                value: id
+                            }))
+                            inquirer
+                                .prompt([
+                                    {
+                                        name: 'role',
+                                        message: 'Which new role would you like to assign to this employee?',
+                                        type: 'list',
+                                        choices: roleChoices
+                                    }
+                                ]).then(res => {
+                                    const role = res.role
+
+                                    db.promise().query('SELECT * FROM employee WHERE manager_id IS NULL')
+                                        .then(([data]) => {
+                                            const managerChoices = data.map(({ first_name, last_name, id }) => ({
+                                                name: `${first_name} ${last_name}`,
+                                                value: id
+                                            }
+                                            ));
+                                            console.log(managerChoices)
+                                            inquirer
+                                                .prompt([
+                                                    {
+                                                        name: 'manager',
+                                                        message: 'Which new manager will this employee report to?',
+                                                        type: 'list',
+                                                        choices: managerChoices
+                                                    }
+                                                ]).then(res => {
+                                                    db.query('UPDATE employee (employee, role_id, manager_id) values (?, ?, ?)', [employee, role, res.manager], function (err, data) {
+                                                        console.log('Employee update successful!')
+                                                        menu()
+                                                    })
+                                                })
+                                        })
+                                })
+                        })
+                })
+        })
+}
+
+function quitApp() {
+    console.log("Goodbye!")
+    process.exit()
+}
