@@ -111,8 +111,8 @@ function addDepartment() {
 }
 
 function viewRoles() {
-    // sql query statement that pulls all roles from the database
-    db.query('SELECT * FROM role', (error, data) => {
+    // sql query statement that pulls role id, role title, department of role, and salary of role  from the database
+    db.query('SELECT role.id, role.title, department.name AS department, role.salary FROM role LEFT JOIN department ON role.department_id = department.id;', (error, data) => {
         console.table(data)
         menu()
     })
@@ -157,8 +157,8 @@ function addRole() {
 }
 
 function viewEmployees() {
-    // sql query statement that pulls all employees from the database
-    db.query('SELECT * FROM employee', (error, data) => {
+    // sql query statement that pulls employees' id and name, role title, department, salary, and manager  from the database
+    db.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id LEFT JOIN employee manager ON manager.id = employee.manager_id;", (error, data) => {
         console.table(data)
         menu()
     })
